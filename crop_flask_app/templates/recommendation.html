@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+{% block title %}Crop Recommendation{% endblock %}
+{% block content %}
+<style>
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.75rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #10b981, #059669);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 1.1rem;
+    }
+
+    .input-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #d1fae5, #6ee7b7);
+        font-size: 1.25rem;
+    }
+
+    .form-group-custom {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-with-icon {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #10b981;
+        font-size: 1.1rem;
+        pointer-events: none;
+    }
+
+    .form-control-custom {
+        padding-left: 3rem;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .weather-card {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+        animation: slideInRight 0.6s ease-out;
+    }
+
+    .weather-stat {
+        text-align: center;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease;
+    }
+
+    .weather-stat:hover {
+        transform: translateY(-5px);
+    }
+
+    .weather-stat i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .weather-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .weather-label {
+        color: #6b7280;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .result-card {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+        animation: zoomIn 0.5s ease-out;
+    }
+
+    @keyframes zoomIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .result-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: bounce 2s ease-in-out infinite;
+    }
+
+    .result-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #065f46;
+        margin-bottom: 0.75rem;
+    }
+
+    .result-crop {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #047857;
+        margin-bottom: 0;
+    }
+
+    .crop-info-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    .crop-info-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 1.5rem;
+    }
+
+    .crop-info-body {
+        padding: 2rem;
+    }
+
+    .crop-detail {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .crop-detail:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .crop-detail-label {
+        font-weight: 700;
+        color: #10b981;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .crop-detail-value {
+        color: #4b5563;
+        line-height: 1.6;
+    }
+
+    .crop-image {
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        margin-top: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .crop-image:hover {
+        transform: scale(1.02);
+    }
+
+    .explanation-box-enhanced {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-left: 5px solid #10b981;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-top: 2rem;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .explanation-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #065f46;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .badge-custom {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #fef3c7, #fcd34d);
+        color: #78350f;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">🌱 Crop Recommendation</h1>
+    <p class="page-subtitle">Enter soil and weather parameters or fetch real-time weather data to get AI-powered crop recommendations</p>
+</div>
+
+<div class="input-section">
+    <h2 class="section-title">
+        <span class="section-icon">⚙️</span>
+        Input Parameters
+    </h2>
+    
+    <form method="POST" class="row g-4">
+        <div class="col-12">
+            <div class="form-group-custom">
+                <label for="city" class="form-label">📍 City for Weather Fetch (Optional)</label>
+                <div class="input-with-icon">
+                    <i class="bi bi-geo-alt input-icon"></i>
+                    <input type="text" class="form-control form-control-custom" id="city" name="city" 
+                           value="{{ city }}" placeholder="e.g., New York, London, Mumbai">
+                </div>
+                <small class="text-muted">Leave empty to enter manual weather data</small>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="nitrogen" class="form-label">🧪 Nitrogen (N)</label>
+            <div class="input-with-icon">
+                <i class="bi bi-droplet input-icon"></i>
+                <input type="number" class="form-control form-control-custom" id="nitrogen" name="nitrogen" 
+                       min="0" max="150" value="{{ nitrogen }}" step="0.1" required>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="phosphorus" class="form-label">⚗️ Phosphorus (P)</label>
+            <div class="input-with-icon">
+                <i class="bi bi-droplet-half input-icon"></i>
+                <input type="number" class="form-control form-control-custom" id="phosphorus" name="phosphorus" 
+                       min="0" max="150" value="{{ phosphorus }}" step="0.1" required>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="potassium" class="form-label">💧 Potassium (K)</label>
+            <div class="input-with-icon">
+                <i class="bi bi-moisture input-icon"></i>
+                <input type="number" class="form-control form-control-custom" id="potassium" name="potassium" 
+                       min="0" max="250" value="{{ potassium }}" step="0.1" required>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="temperature" class="form-label">🌡️ Temperature (°C)</label>
+            <div class="input-with-icon">
+                <i class="bi bi-thermometer-half input-icon"></i>
+                <input type="number" class="form-control form-control-custom" id="temperature" name="temperature" 
+                       min="0" max="50" value="{{ temperature }}" step="0.1" required>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="humidity" class="form-label">💨 Humidity (%)</label>
+            <div class="input-with-icon">
+                <i class="bi bi-cloud-fog input-icon"></i>
+                <input type="number" class="form-control form-control-custom" id="humidity" name="humidity" 
+                       min="0" max="100" value="{{ humidity }}" step="0.1" required>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="ph" class="form-label">🧬 pH Level</label>
+            <div class="input-with-icon">
+                <i class="bi bi-beaker input-icon"></i>
+                <input type="number" class="form-control form-control-custom" id="ph" name="ph" 
+                       min="0" max="14" value="{{ ph }}" step="0.1" required>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="rainfall" class="form-label">🌧️ Rainfall (mm)</label>
+            <div class="input-with-icon">
+                <i class="bi bi-cloud-rain input-icon"></i>
+                <input type="number" class="form-control form-control-custom" id="rainfall" name="rainfall" 
+                       min="0" max="300" value="{{ rainfall }}" step="0.1" required>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary" name="action" value="fetch_weather">
+                    <i class="bi bi-cloud-download"></i> Fetch Weather ☁️
+                </button>
+                <button type="submit" class="btn btn-success btn-lg" name="action" value="recommend_crop">
+                    <i class="bi bi-stars"></i> Recommend Crop 🚜
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if weather_data %}
+<div class="weather-card">
+    <h2 class="section-title">
+        <span class="section-icon">☁️</span>
+        Current Weather in {{ city | capitalize }}
+    </h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="weather-stat">
+                <i class="bi bi-thermometer-half text-danger"></i>
+                <div class="weather-value">{{ weather_data.temperature }}°C</div>
+                <div class="weather-label">Temperature</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="weather-stat">
+                <i class="bi bi-moisture text-info"></i>
+                <div class="weather-value">{{ weather_data.humidity }}%</div>
+                <div class="weather-label">Humidity</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="weather-stat">
+                <i class="bi bi-cloud-rain text-primary"></i>
+                <div class="weather-value">{{ weather_data.rainfall }} mm</div>
+                <div class="weather-label">Rainfall (Daily)</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if prediction %}
+<div class="result-card mb-4">
+    <div class="result-icon">🎉</div>
+    <div class="result-title">Recommended Crop</div>
+    <h2 class="result-crop">{{ prediction }}</h2>
+</div>
+
+{% if crop_info %}
+<div class="crop-info-card">
+    <div class="crop-info-header">
+        <h3 class="mb-0">📚 Detailed Crop Information</h3>
+    </div>
+    <div class="crop-info-body">
+        <div class="crop-detail">
+            <div class="crop-detail-label">
+                <i class="bi bi-flower1"></i>
+                Common Name
+            </div>
+            <div class="crop-detail-value">{{ crop_info.common_name }}</div>
+        </div>
+
+        <div class="crop-detail">
+            <div class="crop-detail-label">
+                <i class="bi bi-journal-text"></i>
+                Scientific Name
+            </div>
+            <div class="crop-detail-value"><em>{{ crop_info.scientific_name }}</em></div>
+        </div>
+
+        <div class="crop-detail">
+            <div class="crop-detail-label">
+                <i class="bi bi-info-circle"></i>
+                Description
+            </div>
+            <div class="crop-detail-value">{{ crop_info.description }}</div>
+        </div>
+
+        <div class="crop-detail">
+            <div class="crop-detail-label">
+                <i class="bi bi-droplet-fill"></i>
+                Watering Requirements
+            </div>
+            <div class="crop-detail-value">
+                {{ crop_info.watering.value }} every {{ crop_info.watering.unit }}
+            </div>
+        </div>
+
+        <div class="crop-detail">
+            <div class="crop-detail-label">
+                <i class="bi bi-sun"></i>
+                Sunlight Requirements
+            </div>
+            <div class="crop-detail-value">
+                {% for light in crop_info.sunlight %}
+                    <span class="badge-custom">{{ light }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if crop_info.image %}
+        <div class="crop-detail">
+            <img src="{{ crop_info.image }}" alt="{{ prediction }} Image" class="crop-image">
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card mb-4 mt-4">
+    <div class="card-header">
+        <i class="bi bi-graph-up"></i> Prediction Probabilities
+    </div>
+    <div class="card-body">
+        {{ prob_div | safe }}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-bar-chart"></i> Key Factors Influencing the Recommendation
+    </div>
+    <div class="card-body">
+        {{ contrib_div | safe }}
+    </div>
+</div>
+
+<div class="explanation-box-enhanced">
+    <div class="explanation-title">
+        <i class="bi bi-lightbulb"></i>
+        Why This Recommendation?
+    </div>
+    {{ explanation | safe }}
+</div>
+{% endif %}
+{% endblock %}

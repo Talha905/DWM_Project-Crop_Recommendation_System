@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+{% block title %}Clustering{% endblock %}
+{% block content %}
+<style>
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.6s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.75rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #a855f7, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #6b7280;
+        font-size: 1.1rem;
+    }
+
+    .info-banner {
+        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15);
+        animation: fadeInUp 0.6s ease-out;
+        border-left: 5px solid #a855f7;
+    }
+
+    .info-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .info-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #e9d5ff, #c084fc);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        flex-shrink: 0;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .info-text h3 {
+        color: #581c87;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        font-size: 1.5rem;
+    }
+
+    .info-text p {
+        color: #6b21a8;
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    .cluster-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-box {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .stat-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15);
+    }
+
+    .stat-icon-box {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #a855f7, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #6b7280;
+        font-weight: 600;
+    }
+
+    .visualization-card {
+        background: white;
+        border-radius: 20px;
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.6s ease-out;
+        transition: all 0.3s ease;
+    }
+
+    .visualization-card:hover {
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        transform: translateY(-3px);
+    }
+
+    .viz-header {
+        background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        font-weight: 700;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .viz-body {
+        padding: 2rem;
+    }
+
+    .insight-box {
+        background: linear-gradient(135deg, #f3e8ff, #e9d5ff);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border-left: 4px solid #a855f7;
+    }
+
+    .insight-box strong {
+        color: #581c87;
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .insight-box p {
+        color: #6b21a8;
+        margin-bottom: 0;
+        line-height: 1.6;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        border-radius: 12px;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, #a855f7, #7c3aed);
+        color: white;
+    }
+
+    .table thead th {
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table tbody tr:hover {
+        background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+        transform: scale(1.01);
+    }
+
+    .cluster-badge {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        font-weight: 700;
+        color: white;
+        margin-right: 0.5rem;
+    }
+
+    .cluster-0 { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+    .cluster-1 { background: linear-gradient(135deg, #10b981, #059669); }
+    .cluster-2 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .cluster-3 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .info-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .cluster-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">🧩 Clustering Analysis</h1>
+    <p class="page-subtitle">Discover hidden patterns and natural groupings in agricultural data</p>
+</div>
+
+<div class="info-banner">
+    <div class="info-content">
+        <div class="info-icon">🔬</div>
+        <div class="info-text">
+            <h3>KMeans Clustering</h3>
+            <p>
+                KMeans is an unsupervised machine learning algorithm that groups similar data points together. 
+                It identifies natural patterns in the crop data by clustering crops with similar environmental 
+                and soil requirements, helping us understand relationships between different agricultural conditions.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="cluster-stats">
+    <div class="stat-box">
+        <div class="stat-icon-box">🎯</div>
+        <div class="stat-number">4</div>
+        <div class="stat-label">Optimal Clusters</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-icon-box">📊</div>
+        <div class="stat-number">PCA</div>
+        <div class="stat-label">Dimensionality Reduction</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-icon-box">🔍</div>
+        <div class="stat-number">7</div>
+        <div class="stat-label">Features Analyzed</div>
+    </div>
+</div>
+
+<div class="visualization-card">
+    <div class="viz-header">
+        <i class="bi bi-graph-up"></i>
+        Elbow Method for Optimal K
+    </div>
+    <div class="viz-body">
+        {{ elbow_div | safe }}
+        <div class="insight-box">
+            <strong>💡 Understanding the Elbow Method</strong>
+            <p>
+                The elbow method helps determine the optimal number of clusters. The "elbow" point 
+                in the graph represents where adding more clusters doesn't significantly improve the model. 
+                Based on this analysis, K=4 provides the best balance between model complexity and performance.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="visualization-card">
+    <div class="viz-header">
+        <i class="bi bi-diagram-3"></i>
+        Clusters Visualization (PCA Space)
+    </div>
+    <div class="viz-body">
+        {{ cluster_div | safe }}
+        <div class="insight-box">
+            <strong>🌟 Cluster Insights</strong>
+            <p>
+                Principal Component Analysis (PCA) reduces the 7-dimensional feature space to 2 dimensions 
+                for visualization. Each cluster represents crops with similar growing conditions. The clear 
+                separation between clusters indicates distinct environmental and soil requirement patterns.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="visualization-card">
+    <div class="viz-header">
+        <i class="bi bi-flower1"></i>
+        Actual Crops Distribution in PCA Space
+    </div>
+    <div class="viz-body">
+        {{ crops_div | safe }}
+        <div class="insight-box">
+            <strong>🎨 Crop Pattern Analysis</strong>
+            <p>
+                This visualization shows how actual crop types are distributed across the reduced feature space. 
+                Crops that appear close together in this space have similar environmental requirements. This helps 
+                identify crop alternatives and understand agricultural diversity.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="visualization-card">
+    <div class="viz-header">
+        <i class="bi bi-bullseye"></i>
+        Cluster Centers (Feature Averages)
+    </div>
+    <div class="viz-body">
+        <div class="table-wrapper">
+            {{ centers_html | safe }}
+        </div>
+        <div class="insight-box">
+            <strong>📈 Cluster Center Interpretation</strong>
+            <p>
+                Each row represents the average conditions for crops in that cluster. These values help define 
+                the typical environmental and soil characteristics needed for crops in each group. Comparing 
+                cluster centers reveals the key differences between crop groups.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
